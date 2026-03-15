@@ -29,7 +29,7 @@
     <meta property="og:url" content="https://thamayanthiboutique.in/" />
     <meta
       property="og:image"
-      content="https://raw.githubusercontent.com/rkrgoldsilver/Thamayenthi-Botique/main/Assets/logo.png"
+      content="https://thamayanthiboutique.in/Assets/logo.png"
     />
     <meta property="og:locale" content="en_IN" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -43,7 +43,7 @@
     />
     <meta
       name="twitter:image"
-      content="https://raw.githubusercontent.com/rkrgoldsilver/Thamayenthi-Botique/main/Assets/logo.png"
+      content="https://thamayanthiboutique.in/Assets/logo.png"
     />
     <script type="application/ld+json">
       {
@@ -129,6 +129,7 @@
       }
       html {
         scroll-behavior: smooth;
+        overflow-x: hidden;
       }
       body {
         font-family: "Poppins", sans-serif;
@@ -136,6 +137,8 @@
         color: var(--td);
         overflow-x: hidden;
         -webkit-font-smoothing: antialiased;
+        max-width: 100vw;
+        position: relative;
       }
       h1,
       h2,
@@ -495,6 +498,7 @@
         transition:
           opacity 0.8s ease,
           visibility 0.8s ease;
+        overflow: hidden;
       }
       #loader.hide {
         opacity: 0;
@@ -638,8 +642,10 @@
       }
 
       /* ═══ HERO CAROUSEL ═══ */
+      /* FIX: 100svh causes address-bar jump on Android & iOS Safari.
+   JS sets --vh = window.innerHeight * 0.01 on load + resize.        */
       #heroCarousel {
-        height: 100svh;
+        height: calc(var(--vh, 1vh) * 100);
         min-height: 560px;
         position: relative;
         overflow: hidden;
@@ -723,6 +729,11 @@
         justify-content: center;
         text-align: center;
         padding: 1.5rem;
+        padding-left: max(1.5rem, env(safe-area-inset-left));
+        padding-right: max(1.5rem, env(safe-area-inset-right));
+        box-sizing: border-box;
+        width: 100%;
+        overflow: hidden;
       }
       .carousel-item.active .hero-ey {
         animation: fadeUp 0.6s 0.1s both;
@@ -744,10 +755,12 @@
         margin-bottom: 10px;
       }
       .hero-h1 {
-        font-size: clamp(1.9rem, 6vw, 4.8rem);
+        font-size: clamp(1.6rem, 5vw, 4.8rem);
         color: #fff;
         font-weight: 700;
         text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+        max-width: 100%;
+        word-break: break-word;
       }
       .hero-h1 em {
         color: var(--pkl);
@@ -756,7 +769,7 @@
       .hero-sub {
         font-size: clamp(0.82rem, 2vw, 1.02rem);
         color: rgba(255, 255, 255, 0.85);
-        max-width: 520px;
+        max-width: min(520px, 90vw);
         margin: 12px auto 0;
         line-height: 1.65;
       }
@@ -932,15 +945,21 @@
       }
 
       /* ═══ PARALLAX ═══ */
+      /* FIX: background-attachment:fixed is BROKEN on iOS Safari (renders blank)
+   and causes grey blocks on Android Chrome. We NEVER use it.
+   Desktop parallax is achieved via JS translateY on .hero-kb inside each .plx.
+   On mobile background-position:center with no attachment looks clean.      */
       .plx {
         position: relative;
         overflow: hidden;
         background-size: cover;
-        background-position: center;
+        background-position: center 40%;
         background-repeat: no-repeat;
+        background-attachment: scroll;
       }
+      /* .pf class kept for JS targeting but no longer sets fixed attachment */
       .plx.pf {
-        background-attachment: fixed;
+        background-attachment: scroll;
       }
       .plx-ov {
         position: absolute;
@@ -1875,6 +1894,29 @@
       }
 
       /* ═══ RESPONSIVE ═══ */
+
+      /* ── Global mobile overflow guard ── */
+      *,
+      *::before,
+      *::after {
+        max-width: 100%;
+      }
+      img,
+      video,
+      iframe {
+        max-width: 100%;
+        height: auto;
+      }
+
+      /* Bootstrap container safe padding on mobile */
+      @media (max-width: 575.98px) {
+        .container,
+        .container-fluid {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+      }
+
       @media (max-width: 991.98px) {
         .about-img img {
           height: 300px;
@@ -1903,10 +1945,30 @@
         .about-float {
           display: none;
         }
+        .hero-ctas {
+          gap: 8px;
+          padding: 0 8px;
+        }
         .hero-ctas .btn-grad,
         .hero-ctas .btn-ol {
-          padding: 0.58rem 1.1rem;
-          font-size: 0.8rem;
+          padding: 0.58rem 1rem;
+          font-size: 0.79rem;
+          flex: 1 1 auto;
+          max-width: calc(50% - 4px);
+          justify-content: center;
+        }
+        .gi-badge {
+          font-size: 0.6rem;
+          padding: 0.3rem 0.75rem;
+          letter-spacing: 0.05em;
+          max-width: 90vw;
+          white-space: normal;
+          text-align: center;
+          justify-content: center;
+        }
+        .hero-ey {
+          letter-spacing: 0.2em;
+          font-size: 0.65rem;
         }
         .col-banner {
           padding: 28px 20px;
@@ -1940,6 +2002,32 @@
         .tl-item::before {
           left: -22px;
         }
+        /* Mobile: show quick view overlay on tap via .tapped class */
+        .pc.tapped .pc-qv-ov {
+          opacity: 1;
+        }
+        /* Prevent about image from overflowing */
+        .about-img {
+          overflow: hidden;
+          border-radius: var(--r);
+        }
+        /* Prevent spin rings from creating horizontal scroll */
+        .spin-ring {
+          display: none;
+        }
+        /* Prevent orbs from overflowing */
+        .orb {
+          display: none;
+        }
+        /* Ensure row doesn't exceed viewport */
+        .row {
+          margin-left: 0;
+          margin-right: 0;
+        }
+        [class*="col-"] {
+          padding-left: 8px;
+          padding-right: 8px;
+        }
       }
       @media (max-width: 575.98px) {
         .filter-btn {
@@ -1953,16 +2041,39 @@
           font-size: 1.5rem;
         }
         .gi-inner {
-          gap: 10px;
+          gap: 8px;
+          padding: 0 8px;
         }
         .gi-chip {
-          font-size: 0.7rem;
-          padding: 0.45rem 0.9rem;
+          font-size: 0.68rem;
+          padding: 0.4rem 0.8rem;
+          white-space: normal;
+          text-align: center;
+        }
+        /* Smaller product names on very small screens */
+        .pc-name {
+          font-size: 0.88rem;
+        }
+        /* Prevent section titles overflowing */
+        .sec-title {
+          font-size: clamp(1.4rem, 6vw, 2.7rem);
+        }
+        .plx-title {
+          font-size: clamp(1.5rem, 6vw, 3.4rem);
+        }
+        /* Prevent col-banner overflow on very small screens */
+        .col-banner::before,
+        .col-banner::after {
+          display: none;
         }
       }
-      @media (hover: none) {
+      /* ── Touch/mobile: disable hover transforms that get "stuck" on tap ── */
+      @media (hover: none), (pointer: coarse) {
         .pc:hover {
-          transform: none;
+          transform: none !important;
+        }
+        .pc:hover .pc-img img {
+          transform: none !important;
         }
         .pc:hover .pc-qv-ov {
           opacity: 0;
@@ -1970,7 +2081,25 @@
         .feat-card:hover {
           transform: none;
         }
+        .feat-card:hover .feat-icon {
+          transform: none;
+        }
         .testi:hover {
+          transform: none;
+        }
+        .btn-grad:hover,
+        .btn-grad:focus {
+          transform: none;
+        }
+        .btn-ol:hover,
+        .btn-ol:focus {
+          transform: none;
+        }
+        .btn-wa:hover,
+        .btn-wa:focus {
+          transform: none;
+        }
+        .sbtn:hover {
           transform: none;
         }
       }
@@ -2705,7 +2834,7 @@
             <div class="pc">
               <div class="pc-img">
                 <img
-                  src="Assets/pic_1.jpeg"
+                  src="https://images.unsplash.com/photo-1619161269754-57e48fae1cde?w=600&q=80"
                   alt="Madurai Sungudi Ayiram Butta Thousand Dots Heritage Saree"
                   loading="lazy"
                 />
@@ -2901,7 +3030,7 @@
             <div class="pc">
               <div class="pc-img">
                 <img
-                  src="Assets/pic_2.jpeg"
+                  src="https://images.unsplash.com/photo-1619161269754-57e48fae1cde?w=600&q=80"
                   alt="Madurai Sungudi Saree Gold Zari Border Handloom Cotton"
                   loading="lazy"
                 />
@@ -3811,7 +3940,7 @@
           disc: "21% OFF",
           rating: 5,
           reviews: 38,
-          img: "Assets/pic_1.jpeg",
+          img: "https://images.unsplash.com/photo-1619161269754-57e48fae1cde?w=800&q=80",
           desc: "The legendary Ayiram Butta — meaning Thousand Dots in Tamil — is the crown jewel of Madurai Sungudi artistry. This extraordinary saree features fine checks alternating with Mayil (peacock) and Chakram (rudraksha) motifs, intricately woven in cotton-silk fabric. The Ayiram Butta technique demands exceptional skill — artisans must precisely tie thousands of knots in complex patterns to create the multi-motif design across the full body of the saree. The result is a saree that displays breathtaking grace and beauty. Recreated by Tamil Nadu handloom clusters, these sarees honour the original patterns and are considered collector pieces. Each saree is unique — no two Ayiram Butta sarees are exactly alike, as the hand-tying process always introduces subtle natural variation.",
           fabric: "Cotton-Silk Blend — Fine Weave",
           color: "Manjal (Yellow) with Peacock & Rudraksha Motifs",
@@ -3911,7 +4040,7 @@
           disc: "24% OFF",
           rating: 4.5,
           reviews: 91,
-          img: "Assets/pic_2.jpeg",
+          img: "https://images.unsplash.com/photo-1619161269754-57e48fae1cde?w=800&q=80",
           desc: "A beautiful blend of the traditional Madurai Sungudi tie-and-dye body with a rich gold zari border — combining the best of two great Tamil Nadu weaving traditions. The saree body features the signature putta (dot) work in vibrant colours, while the zari border is woven separately in pure gold or silver thread, then joined to create the complete saree. The result is a saree that can be worn daily yet also holds its own at weddings, temple festivals and formal occasions. The zari border is sourced from skilled border-weavers who specialise in this complementary craft. This is the most popular everyday festive choice among Tamil women — affordable luxury that honours both cotton craftsmanship and the grandeur of gold zari. The saree is sales-tax exempt in Tamil Nadu since 1959 as part of the government initiative to support this cottage industry.",
           fabric: "Pure Cotton Sungudi with Gold Zari Border",
           color: "Neelam (Blue) Body with Gold Zari Border & White Dots",
@@ -3934,6 +4063,19 @@
         setTimeout(function () {
           $("#loader").addClass("hide");
         }, 2800);
+
+        /* ── 1b. --vh FIX: set CSS variable from real innerHeight ──
+     Fixes iOS Safari address-bar jump & Android browser chrome jump.
+     Called on load and every resize/orientationchange.               */
+        function setVH() {
+          var vh = window.innerHeight * 0.01;
+          document.documentElement.style.setProperty("--vh", vh + "px");
+        }
+        setVH();
+        window.addEventListener("resize", setVH);
+        window.addEventListener("orientationchange", function () {
+          setTimeout(setVH, 300);
+        });
 
         /* ── 2. NAVBAR SCROLL ── */
         $(window).on("scroll.nav", function () {
@@ -3962,23 +4104,23 @@
           });
         });
 
-        /* ── 4. PARALLAX (rAF, disabled on mobile) ── */
+        /* ── 4. PARALLAX ──
+     FIX: background-attachment:fixed is BROKEN on iOS Safari (blank/grey sections)
+     and flickers on Android Chrome. CSS already sets scroll for all.
+     Desktop: smooth background-position% parallax. Mobile: static, no JS.    */
         var mob =
-          /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-          window.innerWidth < 768;
-        if (mob) {
-          $(".plx.pf").css("background-attachment", "scroll");
-        }
+          "ontouchstart" in window ||
+          navigator.maxTouchPoints > 0 ||
+          window.innerWidth < 992;
         var pt = false;
         function doPlx() {
           var sy = window.pageYOffset;
           if (!mob) {
-            $(".plx.pf").each(function () {
+            $(".plx").each(function () {
               var r = this.getBoundingClientRect();
               if (r.bottom > 0 && r.top < window.innerHeight) {
-                var off =
-                  (sy - ($(this).offset().top - window.innerHeight)) * 0.26;
-                $(this).css("background-position", "center " + off + "px");
+                var pct = 40 + (r.top / window.innerHeight) * -15;
+                $(this).css("background-position", "center " + pct + "%");
               }
             });
           }
@@ -3997,7 +4139,9 @@
           }
         });
 
-        /* ── 5. SCROLL REVEAL (IntersectionObserver) ── */
+        /* ── 5. SCROLL REVEAL ──
+     FIX: threshold:0.1 still misses elements on small screens that are
+     taller than the viewport. Use threshold:0 + rootMargin for reliability. */
         var ro = new IntersectionObserver(
           function (entries) {
             entries.forEach(function (e) {
@@ -4007,7 +4151,7 @@
               }
             });
           },
-          { threshold: 0.1, rootMargin: "0px 0px -36px 0px" },
+          { threshold: 0, rootMargin: "0px 0px -20px 0px" },
         );
         document
           .querySelectorAll(".rv,.rv-l,.rv-r,.rv-s")
@@ -4040,6 +4184,27 @@
           $(this).find("i").toggleClass("bi-heart bi-heart-fill");
           $(this).toggleClass("wished");
         });
+
+        /* ── 7b. MOBILE TOUCH: first tap shows QV overlay, second tap opens modal ──
+     On touch devices, hover never fires so overlay is always opacity:0.
+     We add .tapped class on first tap to reveal overlay, and direct tap on
+     overlay/enq button opens QV modal as normal.                             */
+        if (mob) {
+          $(document).on("touchend", ".pc-img", function (e) {
+            var $pc = $(this).closest(".pc");
+            if (!$pc.hasClass("tapped")) {
+              e.preventDefault();
+              $(".pc").not($pc).removeClass("tapped");
+              $pc.addClass("tapped");
+            }
+          });
+          /* Tapping outside any card removes tapped state */
+          $(document).on("touchend", function (e) {
+            if (!$(e.target).closest(".pc").length) {
+              $(".pc").removeClass("tapped");
+            }
+          });
+        }
 
         /* ── 8. CONTACT FORM → WHATSAPP (with validation) ── */
         $("#sendWA").on("click", function () {
@@ -4149,8 +4314,11 @@
           $(this).toggleClass("active");
         });
 
-        /* ── 14. TILT EFFECT (desktop only) ── */
-        if (!mob) {
+        /* ── 14. TILT EFFECT (pointer:fine desktop only — never fires on touch) ── */
+        var canHover = window.matchMedia(
+          "(hover:hover) and (pointer:fine)",
+        ).matches;
+        if (!mob && canHover) {
           $(document)
             .on("mousemove", ".pc", function (e) {
               var r = this.getBoundingClientRect();
